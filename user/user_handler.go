@@ -20,16 +20,16 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	pandorabox.RespondWithJSON(w, http.StatusOK, users)
 }
 
-// FindByName find a User by name
-func FindByName(w http.ResponseWriter, r *http.Request) {
+// FindByFacebookID find a User by FacebookID
+func FindByFacebookID(w http.ResponseWriter, r *http.Request) {
 	db := db.Conn()
 	defer db.Close()
 
 	var users []User
 	vars := mux.Vars(r)
-	name := vars["name"]
+	FacebookID := vars["FacebookID"]
 
-	db.Find(&users, "name = ?", name)
+	db.Find(&users, "FacebookID = ?", FacebookID)
 	if len(users) >= 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, users)
 		return
@@ -99,7 +99,52 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Password = pandorabox.MD5(user.Password)
+	secret := pandorabox.GetOSEnvironment("SECRET_JWT", "fiscaluno")
+
+	msg = pandorabox.Message{
+		Content: "Failed to generate token",
+		Status:  "ERROR",
+		Body:    nil,
+	}
+
+	token, err := user.GenerateToken(secret)
+	if err != nil {
+		pandorabox.RespondWithJSON(w, http.StatusInternalServerError, msg)
+		return
+	}
+	user.Token = token
+
+	db.Create(&user)
+
+	msg = pandorabox.Message{
+		Content: "New user successfully added",
+		Status:  "OK",
+		Body:    user,
+	}
+	pandorabox.RespondWithJSON(w, http.StatusCreated, msg)
+
+}
+
+// Addx a User
+func Addx(w http.ResponseWriter, r *http.Request) {
+	db := db.Conn()
+	defer db.Close()
+
+	var user User
+	var msg pandorabox.Message
+
+	msg = pandorabox.Message{
+		Content: "Invalid request payload",
+		Status:  "ERROR",
+		Body:    nil,
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		pandorabox.RespondWithJSON(w, http.StatusBadRequest, msg)
+		return
+	}
+
+	// user.Password = pandorabox.MD5(user.Password)
 
 	db.Create(&user)
 
