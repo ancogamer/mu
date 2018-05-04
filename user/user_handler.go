@@ -11,25 +11,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GetAll Users
-func GetAll(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
-	var users []User
-	db.Find(&users)
+// FindAll Users
+func FindAll(w http.ResponseWriter, r *http.Request) {
+	users := GetAll()
 	pandorabox.RespondWithJSON(w, http.StatusOK, users)
 }
 
 // FindByFacebookID find a User by FacebookID
 func FindByFacebookID(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
 
-	var users []User
 	vars := mux.Vars(r)
-	FacebookID := vars["FacebookID"]
 
-	db.Find(&users, "FacebookID = ?", FacebookID)
+	FacebookID := vars["id"]
+	users := GetByQuery("facebook_id = ?", FacebookID)
+
 	if len(users) >= 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, users)
 		return
@@ -46,10 +41,6 @@ func FindByFacebookID(w http.ResponseWriter, r *http.Request) {
 
 // FindByID find a User by ID
 func FindByID(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
-
-	var user User
 
 	var msg pandorabox.Message
 
@@ -65,7 +56,9 @@ func FindByID(w http.ResponseWriter, r *http.Request) {
 		pandorabox.RespondWithJSON(w, http.StatusOK, msg)
 		return
 	}
-	db.Find(&user, id)
+
+	user := GetByID(id)
+
 	if user.ID != 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, user)
 		return
@@ -82,8 +75,6 @@ func FindByID(w http.ResponseWriter, r *http.Request) {
 
 // Add a User
 func Add(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
 
 	var user User
 	var msg pandorabox.Message
@@ -99,29 +90,21 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secret := pandorabox.GetOSEnvironment("SECRET_JWT", "fiscaluno")
-
-	msg = pandorabox.Message{
-		Content: "Failed to generate token",
-		Status:  "ERROR",
-		Body:    nil,
-	}
-
-	timeExp := pandorabox.DateAddDays(1)
-
-	token, err := user.GenerateToken(secret, timeExp)
+	userx, err := user.AddWithVerification()
 	if err != nil {
+		msg = pandorabox.Message{
+			Content: err.Error(),
+			Status:  "ERROR",
+			Body:    nil,
+		}
 		pandorabox.RespondWithJSON(w, http.StatusInternalServerError, msg)
 		return
 	}
-	user.Token = token
-
-	db.Create(&user)
 
 	msg = pandorabox.Message{
-		Content: "New user successfully added",
+		Content: "New user successfully added or already existed",
 		Status:  "OK",
-		Body:    user,
+		Body:    userx,
 	}
 	pandorabox.RespondWithJSON(w, http.StatusCreated, msg)
 

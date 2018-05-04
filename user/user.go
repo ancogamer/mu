@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/fiscaluno/mu/db"
+	"github.com/fiscaluno/pandorabox"
 )
 
 // CommonModelFields ia a base for gorm.Model with json type
@@ -29,6 +31,76 @@ var SecretJWT string
 type MyCustomClaims struct {
 	User User `json:"user,omitempty"`
 	jwt.StandardClaims
+}
+
+// GetAll Users
+func GetAll() []User {
+	db := db.Conn()
+	defer db.Close()
+	var users []User
+	db.Find(&users)
+	return users
+}
+
+func (user User) AddWithVerification() (User, error) {
+
+	// validation Facebook ID don't repeat
+	users := GetByQuery("facebook_id = ?", user.FacebookID)
+	if len(users) > 0 {
+		user, err := users[0].NewToken()
+		if err != nil {
+			return user, err
+		}
+		return user, nil
+	}
+
+	db := db.Conn()
+	defer db.Close()
+
+	user, err := user.NewToken()
+	if err != nil {
+		return user, err
+	}
+
+	db.Create(&user)
+
+	return user, nil
+}
+
+func GetByID(id int) User {
+	db := db.Conn()
+	defer db.Close()
+
+	var user User
+
+	db.Find(&user, id)
+
+	return user
+}
+
+func GetByQuery(query string, value interface{}) []User {
+	db := db.Conn()
+	defer db.Close()
+
+	var users []User
+
+	db.Find(&users, query, value)
+	return users
+}
+
+func (user User) NewToken() (User, error) {
+	secret := pandorabox.GetOSEnvironment("SECRET_JWT", "fiscaluno")
+
+	timeExp := pandorabox.DateAddDays(1)
+
+	token, err := user.GenerateToken(secret, timeExp)
+	if err != nil {
+		return user, err
+	}
+
+	user.Token = token
+
+	return user, nil
 }
 
 // GenerateToken generate JWT for auth
