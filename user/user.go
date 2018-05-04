@@ -57,6 +57,11 @@ func (user User) AddWithVerification() (User, error) {
 	db := db.Conn()
 	defer db.Close()
 
+	user, err := user.NewToken()
+	if err != nil {
+		return user, err
+	}
+
 	db.Create(&user)
 
 	return user, nil
