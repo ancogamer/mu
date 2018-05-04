@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/fiscaluno/mu/db"
 )
 
 // CommonModelFields ia a base for gorm.Model with json type
@@ -29,6 +30,15 @@ var SecretJWT string
 type MyCustomClaims struct {
 	User User `json:"user,omitempty"`
 	jwt.StandardClaims
+}
+
+// GetAll Users
+func GetAll() []User {
+	db := db.Conn()
+	defer db.Close()
+	var users []User
+	db.Find(&users)
+	return users
 }
 
 // GenerateToken generate JWT for auth

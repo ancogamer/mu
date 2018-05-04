@@ -11,25 +11,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GetAll Users
-func GetAll(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
-	var users []User
-	db.Find(&users)
+// FindAll Users
+func FindAll(w http.ResponseWriter, r *http.Request) {
+	users := GetAll()
 	pandorabox.RespondWithJSON(w, http.StatusOK, users)
 }
 
 // FindByFacebookID find a User by FacebookID
 func FindByFacebookID(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
 
-	var users []User
 	vars := mux.Vars(r)
-	FacebookID := vars["FacebookID"]
 
-	db.Find(&users, "FacebookID = ?", FacebookID)
+	FacebookID := vars["id"]
+	users := GetByQuery("facebook_id = ?", FacebookID)
+
 	if len(users) >= 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, users)
 		return
