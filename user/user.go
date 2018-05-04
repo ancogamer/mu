@@ -41,6 +41,22 @@ func GetAll() []User {
 	return users
 }
 
+func (u User) Add() (User, error) {
+
+	return u, nil
+}
+
+func GetByID(id int) User {
+	db := db.Conn()
+	defer db.Close()
+
+	var user User
+
+	db.Find(&user, id)
+
+	return user
+}
+
 func GetByQuery(query string, value interface{}) []User {
 	db := db.Conn()
 	defer db.Close()

@@ -41,10 +41,6 @@ func FindByFacebookID(w http.ResponseWriter, r *http.Request) {
 
 // FindByID find a User by ID
 func FindByID(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
-
-	var user User
 
 	var msg pandorabox.Message
 
@@ -60,7 +56,9 @@ func FindByID(w http.ResponseWriter, r *http.Request) {
 		pandorabox.RespondWithJSON(w, http.StatusOK, msg)
 		return
 	}
-	db.Find(&user, id)
+
+	user := GetByID(id)
+
 	if user.ID != 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, user)
 		return
