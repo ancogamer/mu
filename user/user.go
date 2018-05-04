@@ -41,6 +41,16 @@ func GetAll() []User {
 	return users
 }
 
+func GetByQuery(query string, value interface{}) []User {
+	db := db.Conn()
+	defer db.Close()
+
+	var users []User
+
+	db.Find(&users, query, value)
+	return users
+}
+
 // GenerateToken generate JWT for auth
 func (u User) GenerateToken(secret string, expDate int64) (string, error) {
 	mySigningKey := []byte(secret)
