@@ -75,8 +75,6 @@ func FindByID(w http.ResponseWriter, r *http.Request) {
 
 // Add a User
 func Add(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
 
 	var user User
 	var msg pandorabox.Message
@@ -92,29 +90,21 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	secret := pandorabox.GetOSEnvironment("SECRET_JWT", "fiscaluno")
-
-	msg = pandorabox.Message{
-		Content: "Failed to generate token",
-		Status:  "ERROR",
-		Body:    nil,
-	}
-
-	timeExp := pandorabox.DateAddDays(1)
-
-	token, err := user.GenerateToken(secret, timeExp)
+	userx, err := user.AddWithVerification()
 	if err != nil {
+		msg = pandorabox.Message{
+			Content: err.Error(),
+			Status:  "ERROR",
+			Body:    nil,
+		}
 		pandorabox.RespondWithJSON(w, http.StatusInternalServerError, msg)
 		return
 	}
-	user.Token = token
-
-	db.Create(&user)
 
 	msg = pandorabox.Message{
-		Content: "New user successfully added",
+		Content: "New user successfully added or already existed",
 		Status:  "OK",
-		Body:    user,
+		Body:    userx,
 	}
 	pandorabox.RespondWithJSON(w, http.StatusCreated, msg)
 
