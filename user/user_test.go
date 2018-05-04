@@ -11,7 +11,8 @@ func TestUser_GenerateToken(t *testing.T) {
 		Token             string
 	}
 	type args struct {
-		secret string
+		secret  string
+		expDate int64
 	}
 	tests := []struct {
 		name    string
@@ -27,10 +28,10 @@ func TestUser_GenerateToken(t *testing.T) {
 				FacebookID:        "12345",
 			},
 			args: args{
-				secret: "fiscaluno",
+				secret:  "fiscaluno",
+				expDate: 15000,
 			},
-			want: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MCwiY3JlYXRlZEF0IjoiMDAwMS0wMS0wMVQwMDowMDowMFoiLCJ1cGRhdGVkQXQiOiIwMDAxLTAxLTAxVDAwOjAwOjAwWiIsImRlbGV0ZWRBdCI6bnVsbCwiZmFjZWJvb2tJRCI6IjEyMzQ1IiwiZXhwIjoyNTAwMDAwMDAwLCJpc3MiOiJtdSJ9.lpkRuXhnKW-wpzEeqSvj1ew_r_MI25sgucGLsxHGKSg",
-			// want:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjowLCJjcmVhdGVkQXQiOiIwMDAxLTAxLTAxVDAwOjAwOjAwWiIsInVwZGF0ZWRBdCI6IjAwMDEtMDEtMDFUMDA6MDA6MDBaIiwiZGVsZXRlZEF0IjpudWxsLCJmYWNlYm9va0lEIjoiMTIzNDUifSwiZXhwIjoxNTAwMCwiaXNzIjoibXUifQ.fPkpgTaNe3E7juy_efwGJRFm6fbpMYfasv65wLmTTww",
+			want:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjowLCJjcmVhdGVkQXQiOiIwMDAxLTAxLTAxVDAwOjAwOjAwWiIsInVwZGF0ZWRBdCI6IjAwMDEtMDEtMDFUMDA6MDA6MDBaIiwiZGVsZXRlZEF0IjpudWxsLCJmYWNlYm9va0lEIjoiMTIzNDUifSwiZXhwIjoxNTAwMCwiaXNzIjoibXUifQ.fPkpgTaNe3E7juy_efwGJRFm6fbpMYfasv65wLmTTww",
 			wantErr: false,
 		},
 	}
@@ -41,7 +42,7 @@ func TestUser_GenerateToken(t *testing.T) {
 				FacebookID:        tt.fields.FacebookID,
 				Token:             tt.fields.Token,
 			}
-			got, err := u.GenerateToken(tt.args.secret)
+			got, err := u.GenerateToken(tt.args.secret, tt.args.expDate)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("User.GenerateToken() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -60,7 +61,8 @@ func TestUser_ValidateToken(t *testing.T) {
 		FacebookID:        "12345",
 	}
 
-	tkn, _ := uMock.GenerateToken("fiscaluno")
+	tknTrue, _ := uMock.GenerateToken("fiscaluno", 95555550000)
+	tknFalse, _ := uMock.GenerateToken("fiscaluno", 15000)
 
 	type fields struct {
 		CommonModelFields CommonModelFields
@@ -78,11 +80,24 @@ func TestUser_ValidateToken(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Validate JWT",
+			name: "Validate JWT Token OK",
 			fields: fields{
 				CommonModelFields: CommonModelFields{},
 				FacebookID:        "12345",
-				Token:             tkn,
+				Token:             tknTrue,
+			},
+			args: args{
+				secret: "fiscaluno",
+			},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "Validate JWT Token NOT OK",
+			fields: fields{
+				CommonModelFields: CommonModelFields{},
+				FacebookID:        "12345",
+				Token:             tknFalse,
 			},
 			args: args{
 				secret: "fiscaluno",

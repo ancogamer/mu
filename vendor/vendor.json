@@ -11,12 +11,12 @@
 			"versionExact": "v3.2.0"
 		},
 		{
-			"checksumSHA1": "w2NKt/bR9xDrAlUrXHIuQ0ZdIo0=",
+			"checksumSHA1": "afoXbC/k+OKrPtEiT8UGlFWFmWU=",
 			"path": "github.com/fiscaluno/pandorabox",
-			"revision": "b569747e261b47d647d4cf67ce0bd4ed397ecd24",
-			"revisionTime": "2018-04-01T22:27:07Z",
-			"version": "0.1.0",
-			"versionExact": "0.1.0"
+			"revision": "6452ae6c73f5739b484de1b1646a0fc146df4bd2",
+			"revisionTime": "2018-05-04T21:07:54Z",
+			"version": "0.2.0",
+			"versionExact": "0.2.0"
 		},
 		{
 			"checksumSHA1": "Ne2HHjBVT8tegOp3l3ataHYmq9M=",
@@ -76,7 +76,8 @@
 			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
 			"path": "golang.org/x/net/context",
 			"revision": "a8b9294777976932365dabb6640cf1468d95c70f",
-			"revisionTime": "2017-11-29T19:21:16Z"
+			"revisionTime": "2017-11-29T19:21:16Z",
+			"version": "0.2.0"
 		}
 	],
 	"rootPath": "github.com/fiscaluno/mu"

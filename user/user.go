@@ -27,12 +27,12 @@ var SecretJWT string
 
 // MyCustomClaims is used for build JWT
 type MyCustomClaims struct {
-	User
+	User User `json:"user,omitempty"`
 	jwt.StandardClaims
 }
 
 // GenerateToken generate JWT for auth
-func (u User) GenerateToken(secret string) (string, error) {
+func (u User) GenerateToken(secret string, expDate int64) (string, error) {
 	mySigningKey := []byte(secret)
 
 	u.Token = ""
@@ -40,7 +40,7 @@ func (u User) GenerateToken(secret string) (string, error) {
 	claims := MyCustomClaims{
 		u,
 		jwt.StandardClaims{
-			ExpiresAt: 2500000000,
+			ExpiresAt: expDate,
 			Issuer:    "mu",
 		},
 	}
@@ -73,12 +73,17 @@ func (u User) ValidateToken(secret string) (bool, error) {
 		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 			// Token is either expired or not active yet
 			fmt.Println("Timing is everything")
+			return false, nil
+
 		} else {
 			fmt.Println("Couldn't handle this token:", err)
+			return false, err
+
 		}
 	} else {
 		fmt.Println("Couldn't handle this token:", err)
+		return false, err
 	}
 
-	return false, nil
+	return true, nil
 }

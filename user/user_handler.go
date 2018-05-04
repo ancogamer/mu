@@ -107,7 +107,9 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		Body:    nil,
 	}
 
-	token, err := user.GenerateToken(secret)
+	timeExp := pandorabox.DateAddDays(1)
+
+	token, err := user.GenerateToken(secret, timeExp)
 	if err != nil {
 		pandorabox.RespondWithJSON(w, http.StatusInternalServerError, msg)
 		return
