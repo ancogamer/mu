@@ -11,25 +11,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// GetAll Users
-func GetAll(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
-	var users []User
-	db.Find(&users)
+// FindAll Users
+func FindAll(w http.ResponseWriter, r *http.Request) {
+	users := GetAll()
 	pandorabox.RespondWithJSON(w, http.StatusOK, users)
 }
 
-// FindByName find a User by name
-func FindByName(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
+// FindByFacebookID find a User by FacebookID
+func FindByFacebookID(w http.ResponseWriter, r *http.Request) {
 
-	var users []User
 	vars := mux.Vars(r)
-	name := vars["name"]
 
-	db.Find(&users, "name = ?", name)
+	FacebookID := vars["id"]
+	users := GetByQuery("facebook_id = ?", FacebookID)
+
 	if len(users) >= 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, users)
 		return
@@ -46,10 +41,6 @@ func FindByName(w http.ResponseWriter, r *http.Request) {
 
 // FindByID find a User by ID
 func FindByID(w http.ResponseWriter, r *http.Request) {
-	db := db.Conn()
-	defer db.Close()
-
-	var user User
 
 	var msg pandorabox.Message
 
@@ -65,7 +56,9 @@ func FindByID(w http.ResponseWriter, r *http.Request) {
 		pandorabox.RespondWithJSON(w, http.StatusOK, msg)
 		return
 	}
-	db.Find(&user, id)
+
+	user := GetByID(id)
+
 	if user.ID != 0 {
 		pandorabox.RespondWithJSON(w, http.StatusOK, user)
 		return
@@ -82,6 +75,43 @@ func FindByID(w http.ResponseWriter, r *http.Request) {
 
 // Add a User
 func Add(w http.ResponseWriter, r *http.Request) {
+
+	var user User
+	var msg pandorabox.Message
+
+	msg = pandorabox.Message{
+		Content: "Invalid request payload",
+		Status:  "ERROR",
+		Body:    nil,
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		pandorabox.RespondWithJSON(w, http.StatusBadRequest, msg)
+		return
+	}
+
+	userx, err := user.AddWithVerification()
+	if err != nil {
+		msg = pandorabox.Message{
+			Content: err.Error(),
+			Status:  "ERROR",
+			Body:    nil,
+		}
+		pandorabox.RespondWithJSON(w, http.StatusInternalServerError, msg)
+		return
+	}
+
+	msg = pandorabox.Message{
+		Content: "New user successfully added or already existed",
+		Status:  "OK",
+		Body:    userx,
+	}
+	pandorabox.RespondWithJSON(w, http.StatusCreated, msg)
+
+}
+
+// Addx a User
+func Addx(w http.ResponseWriter, r *http.Request) {
 	db := db.Conn()
 	defer db.Close()
 
@@ -99,7 +129,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Password = pandorabox.MD5(user.Password)
+	// user.Password = pandorabox.MD5(user.Password)
 
 	db.Create(&user)
 

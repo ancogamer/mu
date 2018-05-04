@@ -4,4 +4,4 @@ build:
   languages:
     - go
 run:
-  web: crudgo
+  web: mu
