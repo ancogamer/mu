@@ -11,6 +11,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// TokenDetails JWT Infos
+func TokenDetails(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	jwt := vars["jwt"]
+
+	info, err := TokenInfos(jwt)
+	if err != nil {
+		pandorabox.RespondWithJSON(w, http.StatusInternalServerError, info)
+		return
+	}
+
+	pandorabox.RespondWithJSON(w, http.StatusOK, info)
+
+}
+
 // FindAll Users
 func FindAll(w http.ResponseWriter, r *http.Request) {
 	users := GetAll()
