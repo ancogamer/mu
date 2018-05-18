@@ -33,6 +33,14 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
+// TokenDetail response for token details
+type TokenDetail struct {
+	Valid  bool   `json:"valid"`
+	UserID uint   `json:"userID,omitempty"`
+	Active bool   `json:"active"`
+	Note   string `json:"note,omitempty"`
+}
+
 // GetAll Users
 func GetAll() []User {
 	db := db.Conn()
@@ -125,13 +133,30 @@ func (u User) GenerateToken(secret string, expDate int64) (string, error) {
 
 // ValidateToken validate a JWT
 func (u User) ValidateToken(secret string) (bool, error) {
+
+	valid, err := TokenInfos(u.Token)
+	if err != nil {
+		return false, err
+	}
+
+	ret := valid.Active
+
+	return ret, nil
+}
+
+// TokenInfos return ifos of JWT
+func TokenInfos(tokenString string) (TokenDetail, error) {
 	// mySigningKey := []byte(secret)
 	// Token from another example.  This token is expired
-	var tokenString = u.Token
 
 	// token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 	// 	return []byte("fiscaluno"), nil
 	// })
+
+	detail := TokenDetail{
+		Valid:  true,
+		Active: true,
+	}
 
 	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte("fiscaluno"), nil
@@ -139,23 +164,36 @@ func (u User) ValidateToken(secret string) (bool, error) {
 
 	if token.Valid {
 		fmt.Println("You look nice today")
+		detail.Note = "You look nice today"
 	} else if ve, ok := err.(*jwt.ValidationError); ok {
+		detail.Valid = false
 		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
 			fmt.Println("That's not even a token")
+			detail.Valid = false
+			detail.Active = false
+			detail.Note = "That's not even a token"
 		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
 			// Token is either expired or not active yet
 			fmt.Println("Timing is everything")
-			return false, nil
+			detail.Active = false
+			detail.Note = "Timing is everything"
+			return detail, nil
 
 		} else {
 			fmt.Println("Couldn't handle this token:", err)
-			return false, err
+			detail.Active = false
+			detail.Note = err.Error()
+			return detail, err
 
 		}
 	} else {
 		fmt.Println("Couldn't handle this token:", err)
-		return false, err
+		detail.Valid = false
+		detail.Active = false
+		detail.Note = err.Error()
+		return detail, err
 	}
 
-	return true, nil
+	return detail, nil
+
 }
