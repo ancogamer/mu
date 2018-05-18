@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/fiscaluno/mu/client"
 	"github.com/fiscaluno/mu/logs"
 	"github.com/fiscaluno/mu/user"
 	"github.com/fiscaluno/pandorabox"
@@ -25,6 +26,7 @@ func Listen() {
 
 	r := mux.NewRouter()
 	r.Use(logs.LoggingMiddleware)
+	r.Use(client.SecurityMiddleware)
 
 	user.SetRoutes(r.PathPrefix("/users").Subrouter())
 
