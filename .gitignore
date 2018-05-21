@@ -14,9 +14,4 @@
 .glide/
 
 /vendor/github.com
-<<<<<<< HEAD
 /vendor/golang.org
-
-=======
-/vendor/golang.org
->>>>>>> hotfix/0.3.2
