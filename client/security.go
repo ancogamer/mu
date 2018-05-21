@@ -10,7 +10,6 @@ import (
 // SecurityMiddleware log all requests URI
 func SecurityMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		msg := pandorabox.Message{
 			Content: "Security",
 			Status:  "Unauthorized",
