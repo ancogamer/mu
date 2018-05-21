@@ -11,10 +11,15 @@
 			"versionExact": "v3.2.0"
 		},
 		{
-			"checksumSHA1": "afoXbC/k+OKrPtEiT8UGlFWFmWU=",
+			"checksumSHA1": "7Noy2Ny1I1Xq7BfAdrcYm5eeT0s=",
 			"path": "github.com/fiscaluno/pandorabox",
+<<<<<<< HEAD
 			"revision": "6452ae6c73f5739b484de1b1646a0fc146df4bd2",
 			"revisionTime": "2018-05-04T21:07:54Z",
+=======
+			"revision": "944883626e254816d3c598df207403deadc8f8f2",
+			"revisionTime": "2018-05-21T18:54:51Z",
+>>>>>>> hotfix/0.3.2
 			"version": "0.3.0",
 			"versionExact": "0.3.0"
 		},
