@@ -35,8 +35,8 @@ func Listen() {
 	http.Handle("/", r)
 
 	originsOk := handlers.AllowedOrigins([]string{"*"})
-	headersOk := handlers.AllowedHeaders([]string{"X-Client-ID", "Content-Type"})
-	methodsOk := handlers.AllowedMethods([]string{"*"})
+	headersOk := handlers.AllowedHeaders([]string{"X-Client-ID", "Content-Type", "X-Requested-With"})
+	methodsOk := handlers.AllowedMethods([]string{"OPTIONS", "DELETE", "GET", "HEAD", "POST", "PUT"})
 
 	log.Println("Listen on port: " + port)
 	if err := http.ListenAndServe(":"+port, handlers.CORS(originsOk, headersOk, methodsOk)(r)); err != nil {
