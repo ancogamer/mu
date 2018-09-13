@@ -9,3 +9,6 @@ install:
 
 notifications:
     email: false
+    
+env:   
+CGO_ENABLED=1
