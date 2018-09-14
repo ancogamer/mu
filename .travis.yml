@@ -8,7 +8,10 @@ install:
     - govendor sync
 
 notifications:
-    email: false
-    
+    email: false    
 env:   
 CGO_ENABLED=1
+CGO_CFLAGS= -g -O2
+CGO_CXXFLAGS= -g -O2
+CGO_FFLAGS= -g -O2
+CGO_LDFLAGS= -g -O2
