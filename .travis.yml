@@ -11,3 +11,6 @@ notifications:
     email: false    
 env:   
 CGO_ENABLED=1
+ GOOS=linux 
+ GOARCH=arm 
+ GOARM=7
